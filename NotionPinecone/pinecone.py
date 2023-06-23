@@ -9,6 +9,7 @@ from .utils import *
 
 LLM_MODEL = "gpt-3.5-turbo"
 
+
 class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
     """
     A class that inherits from Pinecone and GRPCIndex to manage Pinecone vector stores.
@@ -28,11 +29,11 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         database_name,
         embedder,
         metadata_text_field="text",
-        openai_api_key = None,
+        openai_api_key=None,
         pinecone_api_key=None,
         pinecone_environment=None,
-        llm_model = LLM_MODEL,
-        proxy_connection = None
+        llm_model=LLM_MODEL,
+        proxy_connection=None,
     ):
         """The constructor for PineconeVectorStore class."""
         self.database_name = database_name
@@ -40,15 +41,19 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         self.metadata_text_field = metadata_text_field
         self.openai_api_key = get_env_var("OPENAI_API_KEY", openai_api_key)
         self.pinecone_api_key = get_env_var("PINECONE_API_KEY", pinecone_api_key)
-        self.pinecone_environment = get_env_var("PINECONE_ENVIRONMENT", pinecone_environment)
+        self.pinecone_environment = get_env_var(
+            "PINECONE_ENVIRONMENT", pinecone_environment
+        )
         self.llm_model = llm_model
         self.proxy_connection = proxy_connection
 
         pinecone.init(
             api_key=self.pinecone_api_key,
             environment=self.pinecone_environment,
-            openapi_config= self._create_openai_proxy_config() if self.proxy_connection else None
-        ) 
+            openapi_config=self._create_openai_proxy_config()
+            if self.proxy_connection
+            else None,
+        )
 
         pinecone.GRPCIndex.__init__(self, self.database_name)
         Pinecone.__init__(
@@ -100,7 +105,7 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         return ChatOpenAI(
             openai_api_key=self.openai_api_key,
             model_name=self.llm_model,
-            temperature=0.0
+            temperature=0.0,
         )
 
     @property
@@ -112,9 +117,7 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
             RetrievalQAWithSourcesChain: A RetrievalQAWithSourcesChain object.
         """
         return RetrievalQAWithSourcesChain.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=self.as_retriever()
+            llm=self.llm, chain_type="stuff", retriever=self.as_retriever()
         )
 
     def ask(self, query):

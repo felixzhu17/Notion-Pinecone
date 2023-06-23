@@ -4,6 +4,7 @@ from .pinecone import PineconeVectorStore
 import os
 from tqdm import tqdm
 
+
 class NotionPinecone(PineconeVectorStore):
     """
     A class that inherits from PineconeVectorStore and is used to manage Notion data in Pinecone.
@@ -28,7 +29,8 @@ class NotionPinecone(PineconeVectorStore):
         openai_api_key=None,
         pinecone_api_key=None,
         pinecone_environment=None,
-        llm_model = "gpt-3.5-turbo"
+        llm_model="gpt-3.5-turbo",
+        proxy_connection=None,
     ):
         """The constructor for NotionPinecone class."""
         self.notion_path = notion_path
@@ -42,10 +44,11 @@ class NotionPinecone(PineconeVectorStore):
             database_name=database_name,
             embedder=embedder,
             metadata_text_field=metadata_text_field,
-            openai_api_key = openai_api_key,
+            openai_api_key=openai_api_key,
             pinecone_api_key=pinecone_api_key,
             pinecone_environment=pinecone_environment,
-            llm_model = llm_model
+            llm_model=llm_model,
+            proxy_connection=proxy_connection,
         )
 
     def extract_notion_data(self):
@@ -98,8 +101,16 @@ class NotionPinecone(PineconeVectorStore):
             tuple: Tuple containing IDs, documents and metadata of the pages not in Pinecone.
         """
         print("Checking if pages are in Pinecone...")
-        page_does_not_exist_in_db = [i for i in tqdm(self.unique_notion_pages) if not self._check_notion_page_in_db(i)]
-        filtered = [(id, doc, meta) for id, doc, meta in zip(self.ids, self.docs, self.metadata) if meta['source'] in page_does_not_exist_in_db]
+        page_does_not_exist_in_db = [
+            i
+            for i in tqdm(self.unique_notion_pages)
+            if not self._check_notion_page_in_db(i)
+        ]
+        filtered = [
+            (id, doc, meta)
+            for id, doc, meta in zip(self.ids, self.docs, self.metadata)
+            if meta["source"] in page_does_not_exist_in_db
+        ]
 
         if filtered:
             filtered_ids, filtered_docs, filtered_metas = zip(*filtered)
@@ -117,4 +128,13 @@ class NotionPinecone(PineconeVectorStore):
         Returns:
             bool: True if the page is in the database, False otherwise.
         """
-        return len(self.query([0] * self.embedder.dimensions, top_k=1, filter={"source": notion_page})['matches']) > 0
+        return (
+            len(
+                self.query(
+                    [0] * self.embedder.dimensions,
+                    top_k=1,
+                    filter={"source": notion_page},
+                )["matches"]
+            )
+            > 0
+        )

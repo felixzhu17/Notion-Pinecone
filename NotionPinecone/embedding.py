@@ -120,6 +120,7 @@ class Embedder:
         """Defines the embedder using the OpenAIEmbeddings."""
         return OpenAIEmbeddings(model=self.name, openai_api_key=self.openai_api_key)
 
+
 # Instance of the Embedder class using the model 'text-embedding-ada-002'
 def ada_v2(openai_api_key=None):
     return Embedder(
@@ -127,5 +128,5 @@ def ada_v2(openai_api_key=None):
         tokenizer="cl100k_base",
         dimensions=1536,
         max_tokens=500,
-        openai_api_key=openai_api_key
+        openai_api_key=openai_api_key,
     )
