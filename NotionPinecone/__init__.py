@@ -1,4 +1,4 @@
-from .embedding import ADA_V2, Embedder
+from .embedding import ada_v2, Embedder
 from .notion import NotionPinecone
 from .pinecone import PineconeVectorStore
 
