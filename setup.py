@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="notion-pinecone",
-    version="0.0.16",
+    version="0.0.17",
     license="MIT",
     author="Felix Zhu",
     author_email="zhu.felix@outlook.com",
