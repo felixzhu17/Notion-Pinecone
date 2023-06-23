@@ -120,15 +120,12 @@ class Embedder:
         """Defines the embedder using the OpenAIEmbeddings."""
         return OpenAIEmbeddings(model=self.name, openai_api_key=self.openai_api_key)
 
-
 # Instance of the Embedder class using the model 'text-embedding-ada-002'
-try:
-    ADA_V2 = Embedder(
+def ada_v2(openai_api_key=None):
+    return Embedder(
         name="text-embedding-ada-002",
         tokenizer="cl100k_base",
         dimensions=1536,
         max_tokens=500,
+        openai_api_key=openai_api_key
     )
-except EnvironmentError:
-    warnings.warn("Base Embedders not initialized as OpenAI API key is not found in Environment Variables.")
-
