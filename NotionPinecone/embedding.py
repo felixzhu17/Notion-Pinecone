@@ -2,6 +2,7 @@ import os
 import tiktoken
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
+from .utils import *
 
 # Overlap factor for text splitting
 OVERLAP_FACTOR = 20
@@ -27,7 +28,7 @@ class Embedder:
         dimensions,
         max_tokens,
         overlap_factor=OVERLAP_FACTOR,
-        openai_api_key=os.environ.get("OPENAI_API_KEY"),
+        openai_api_key=None,
     ):
         """The constructor for Embedder class."""
         self.name = name
@@ -35,7 +36,7 @@ class Embedder:
         self.dimensions = dimensions
         self.max_tokens = max_tokens
         self.overlap_factor = overlap_factor
-        self.openai_api_key = openai_api_key
+        self.openai_api_key = get_env_var("OPENAI_API_KEY", openai_api_key)
 
     def encode(self, text):
         """

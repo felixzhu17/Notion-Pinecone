@@ -25,9 +25,9 @@ class NotionPinecone(PineconeVectorStore):
         database_name,
         embedder,
         metadata_text_field="text",
-        openai_api_key = os.environ.get("OPENAI_API_KEY"),
-        pinecone_api_key=os.environ.get("PINECONE_API_KEY"),
-        pinecone_environment=os.environ.get("PINECONE_ENVIRONMENT"),
+        openai_api_key=None,
+        pinecone_api_key=None,
+        pinecone_environment=None,
         llm_model = "gpt-3.5-turbo"
     ):
         """The constructor for NotionPinecone class."""

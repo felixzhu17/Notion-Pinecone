@@ -1,5 +1,25 @@
 import hashlib
 from tqdm import tqdm
+import os
+
+def get_env_var(key, var=None):
+    """Retrieve an environment variable or return a given default value.
+
+    Raises:
+        EnvironmentError: If the environment variable doesn't exist and no default value is provided.
+
+    Args:
+        key (str): The environment variable key.
+        var (str, optional): The default value to return if the environment variable is not set.
+
+    Returns:
+        str: The value of the environment variable or the default value.
+    """
+    var = var or os.getenv(key)
+    if var is None:
+        raise EnvironmentError(f"Environment variable {key} is not set")
+    return var
+
 
 def chunk_data_sources(data, sources, text_split_func):
     """

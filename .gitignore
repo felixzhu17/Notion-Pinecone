@@ -4,3 +4,4 @@ Notion_DB
 build
 dist
 notion_pinecone.egg-info
+*.ipynb

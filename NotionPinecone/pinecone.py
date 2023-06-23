@@ -4,6 +4,7 @@ from langchain.vectorstores import Pinecone
 from tqdm import tqdm
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQAWithSourcesChain
+from .utils import *
 
 LLM_MODEL = "gpt-3.5-turbo"
 
@@ -26,18 +27,18 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         database_name,
         embedder,
         metadata_text_field="text",
-        openai_api_key = os.environ.get("OPENAI_API_KEY"),
-        pinecone_api_key=os.environ.get("PINECONE_API_KEY"),
-        pinecone_environment=os.environ.get("PINECONE_ENVIRONMENT"),
+        openai_api_key = None,
+        pinecone_api_key=None,
+        pinecone_environment=None,
         llm_model = LLM_MODEL
     ):
         """The constructor for PineconeVectorStore class."""
         self.database_name = database_name
         self.embedder = embedder
         self.metadata_text_field = metadata_text_field
-        self.openai_api_key=openai_api_key
-        self.pinecone_api_key = pinecone_api_key
-        self.pinecone_environment = pinecone_environment
+        self.openai_api_key = get_env_var("OPENAI_API_KEY", openai_api_key)
+        self.pinecone_api_key = get_env_var("PINECONE_API_KEY", pinecone_api_key)
+        self.pinecone_environment = get_env_var("PINECONE_ENVIRONMENT", pinecone_environment)
         self.llm_model = llm_model
         pinecone.init(
             api_key=self.pinecone_api_key, environment=self.pinecone_environment
