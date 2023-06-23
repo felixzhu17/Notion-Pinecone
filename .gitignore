@@ -1,2 +1,6 @@
 test_env
 Notion_DB
+.eggs
+build
+dist
+notion_pinecone.egg-info
