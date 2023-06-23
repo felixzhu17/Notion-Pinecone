@@ -68,6 +68,22 @@ def hash_docs(docs):
     """
     return [hash(doc) for doc in docs]
 
-def format_notion_source(source):
-    cleaned_string = re.sub(r'([a-f0-9]{32}\.md|[a-f0-9]{32}/| [a-f0-9]{32} )', '', source)
+def format_notion_source(string):
+    """
+    Formats the input string by replacing backslashes with forward slashes, removing UUID-like sequences and trailing spaces.
+
+    The function expects the UUID-like sequences to be 32 alphanumeric characters long. These sequences are removed if they 
+    are followed by a ".md", a slash "/", or are sandwiched between spaces. All trailing spaces at the end of the string are 
+    also removed.
+
+    Args:
+        string (str): The input string to be formatted. The string is expected to contain UUID-like sequences and possibly 
+        backslashes and trailing spaces.
+
+    Returns:
+        str: The formatted string with UUID-like sequences, backslashes and trailing spaces removed.
+    """
+    string = string.replace('\\', '/')
+    cleaned_string = re.sub(r'([a-f0-9]{32}/|[a-f0-9]{32}\.md| [a-f0-9]{32} )', '', string)
+    cleaned_string = cleaned_string.rstrip()
     return cleaned_string
