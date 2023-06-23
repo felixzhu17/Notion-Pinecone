@@ -134,6 +134,6 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
 
     def _create_openai_proxy_config(self):
         openapi_config = OpenApiConfiguration.get_default_copy()
-        openapi_config.verify_ssl = False
+        openapi_config.verify_ssl = True
         openapi_config.proxy = self.proxy_connection
         return openapi_config
