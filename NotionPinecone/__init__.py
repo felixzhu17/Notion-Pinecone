@@ -3,4 +3,4 @@ from .notion import NotionPinecone
 from .pinecone import PineconeVectorStore
 
 
-__version__ = "0.0.15"
+__version__ = "0.0.16"
