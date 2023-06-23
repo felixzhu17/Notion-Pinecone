@@ -1,4 +1,5 @@
 import pinecone
+from pinecone.core.client.configuration import Configuration as OpenApiConfiguration
 import os
 from langchain.vectorstores import Pinecone
 from tqdm import tqdm
@@ -30,7 +31,8 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         openai_api_key = None,
         pinecone_api_key=None,
         pinecone_environment=None,
-        llm_model = LLM_MODEL
+        llm_model = LLM_MODEL,
+        proxy_connection = None
     ):
         """The constructor for PineconeVectorStore class."""
         self.database_name = database_name
@@ -40,9 +42,14 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         self.pinecone_api_key = get_env_var("PINECONE_API_KEY", pinecone_api_key)
         self.pinecone_environment = get_env_var("PINECONE_ENVIRONMENT", pinecone_environment)
         self.llm_model = llm_model
+        self.proxy_connection = proxy_connection
+
         pinecone.init(
-            api_key=self.pinecone_api_key, environment=self.pinecone_environment
-        )
+            api_key=self.pinecone_api_key,
+            environment=self.pinecone_environment,
+            openapi_config= self._create_openai_proxy_config() if self.proxy_connection else None
+        ) 
+
         pinecone.GRPCIndex.__init__(self, self.database_name)
         Pinecone.__init__(
             self,
@@ -121,3 +128,9 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
             str: The response to the query.
         """
         return self.question_answer(query)
+
+    def _create_openai_proxy_config(self):
+        openapi_config = OpenApiConfiguration.get_default_copy()
+        openapi_config.verify_ssl = False
+        openapi_config.proxy = self.proxy_connection
+        return openapi_config
