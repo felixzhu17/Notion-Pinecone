@@ -3,6 +3,7 @@ import tiktoken
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from .utils import *
+import warnings
 
 # Overlap factor for text splitting
 OVERLAP_FACTOR = 20
@@ -121,9 +122,13 @@ class Embedder:
 
 
 # Instance of the Embedder class using the model 'text-embedding-ada-002'
-ADA_V2 = Embedder(
-    name="text-embedding-ada-002",
-    tokenizer="cl100k_base",
-    dimensions=1536,
-    max_tokens=500,
-)
+try:
+    ADA_V2 = Embedder(
+        name="text-embedding-ada-002",
+        tokenizer="cl100k_base",
+        dimensions=1536,
+        max_tokens=500,
+    )
+except EnvironmentError:
+    warnings.warn("Base Embedders not initialized as OpenAI API key is not found in Environment Variables.")
+
