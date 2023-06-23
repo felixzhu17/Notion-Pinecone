@@ -8,6 +8,19 @@ from langchain.chains import RetrievalQAWithSourcesChain
 LLM_MODEL = "gpt-3.5-turbo"
 
 class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
+    """
+    A class that inherits from Pinecone and GRPCIndex to manage Pinecone vector stores.
+
+    Attributes:
+        database_name (str): Name of the Pinecone database.
+        embedder (obj): An object of a class handling embeddings.
+        metadata_text_field (str): Name of the field that holds text data.
+        openai_api_key (str): The key for the OpenAI API.
+        pinecone_api_key (str): The key for the Pinecone API.
+        pinecone_environment (str): The Pinecone environment to be used.
+        llm_model (str): The model to be used for language learning.
+    """
+
     def __init__(
         self,
         database_name,
@@ -16,8 +29,9 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         openai_api_key = os.environ.get("OPENAI_API_KEY"),
         pinecone_api_key=os.environ.get("PINECONE_API_KEY"),
         pinecone_environment=os.environ.get("PINECONE_ENVIRONMENT"),
-        llm_model = "gpt-3.5-turbo"
+        llm_model = LLM_MODEL
     ):
+        """The constructor for PineconeVectorStore class."""
         self.database_name = database_name
         self.embedder = embedder
         self.metadata_text_field = metadata_text_field
@@ -37,6 +51,7 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         )
 
     def create_database(self):
+        """Creates a Pinecone database if it doesn't already exist."""
         if self.database_name not in pinecone.list_indexes():
             pinecone.create_index(
                 name=self.database_name,
@@ -45,6 +60,15 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
             )
 
     def upload_in_batches(self, ids, embeddings, metadata, batch_size=100):
+        """
+        Uploads data to Pinecone in batches.
+
+        Args:
+            ids (list): The list of IDs.
+            embeddings (list): The list of embeddings.
+            metadata (list): The list of metadata.
+            batch_size (int, optional): The size of each batch. Defaults to 100.
+        """
         num_batches = len(ids) // batch_size + (len(ids) % batch_size != 0)
 
         for i in tqdm(range(num_batches)):
@@ -59,6 +83,12 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
 
     @property
     def llm(self):
+        """
+        Property that returns a ChatOpenAI object with the specified API key and model.
+
+        Returns:
+            ChatOpenAI: A ChatOpenAI object.
+        """
         return ChatOpenAI(
             openai_api_key=self.openai_api_key,
             model_name=self.llm_model,
@@ -67,6 +97,12 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
 
     @property
     def question_answer(self):
+        """
+        Property that returns a RetrievalQAWithSourcesChain object.
+
+        Returns:
+            RetrievalQAWithSourcesChain: A RetrievalQAWithSourcesChain object.
+        """
         return RetrievalQAWithSourcesChain.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
@@ -74,8 +110,13 @@ class PineconeVectorStore(Pinecone, pinecone.GRPCIndex):
         )
 
     def ask(self, query):
+        """
+        Ask a question and get a response.
+
+        Args:
+            query (str): The query to ask.
+
+        Returns:
+            str: The response to the query.
+        """
         return self.question_answer(query)
-
-
-
-        
