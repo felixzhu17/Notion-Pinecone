@@ -1,6 +1,7 @@
 import hashlib
 from tqdm import tqdm
 import os
+import re
 
 def get_env_var(key, var=None):
     """Retrieve an environment variable or return a given default value.
@@ -66,3 +67,7 @@ def hash_docs(docs):
         list: The list of hashes for each document.
     """
     return [hash(doc) for doc in docs]
+
+def format_notion_source(source):
+    cleaned_string = re.sub(r'([a-f0-9]{32}\.md|[a-f0-9]{32}/| [a-f0-9]{32} )', '', source)
+    return cleaned_string
