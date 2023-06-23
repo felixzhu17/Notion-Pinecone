@@ -62,7 +62,7 @@ class NotionPinecone(PineconeVectorStore):
             with open(p, encoding="utf-8") as f:
                 try:
                     data.append(f.read())
-                    sources.append(str(p))
+                    sources.append(format_notion_source(str(p)))
                 except UnicodeDecodeError:
                     print(f"Unable to read file: {p}. Skipping...")
         print("Chunking Notion files...")
