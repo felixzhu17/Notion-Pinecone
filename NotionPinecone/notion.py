@@ -76,7 +76,7 @@ class NotionPinecone(PineconeVectorStore):
         print("Chunking files...")
         return chunk_data_sources(data, sources, self.embedder.split_text)
 
-    def extract_pdf(paths):
+    def extract_pdf(self, paths):
         data = []
         sources = []
         for p in tqdm(paths):
@@ -91,7 +91,7 @@ class NotionPinecone(PineconeVectorStore):
                 print(f"Unable to read file: {p}. Exception: {str(e)}. Skipping...")
         return data, sources
                 
-    def extract_doc(paths):
+    def extract_doc(self, paths):
         data = []
         sources = []
         for p in tqdm(paths):
@@ -104,7 +104,7 @@ class NotionPinecone(PineconeVectorStore):
                 print(f"Unable to read file: {p}. Exception: {str(e)}. Skipping...")
         return data, sources
 
-    def extract_md(paths):
+    def extract_md(self, paths):
         data = []
         sources = []
         for p in tqdm(paths):
