@@ -125,11 +125,14 @@ class NotionPinecone(PineconeVectorStore):
         """
         return list(set([i["source"] for i in self.metadata]))
 
-    def upload_notion_vectors(self):
+    def upload_notion_vectors(self, check_exists = True):
         """
         Upload Notion pages to Pinecone. If all pages are already in Pinecone, no upload is performed.
         """
-        ids, docs, metadata = self._filter_vectors_not_in_database()
+        if check_exists:
+            ids, docs, metadata = self._filter_vectors_not_in_database()
+        else:
+            ids, docs, metadata = self.ids, self.docs, self.metadata
         if len(ids) == 0:
             print("All Notion pages are already in Pinecone. No need to upload.")
             return
