@@ -6,3 +6,5 @@ bumpversion
 setuptools
 wheel
 twine
+pdfplumber
+python-docx

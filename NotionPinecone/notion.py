@@ -3,6 +3,8 @@ from .utils import *
 from .pinecone import PineconeVectorStore
 import os
 from tqdm import tqdm
+import pdfplumber
+from docx import Document
 
 
 class NotionPinecone(PineconeVectorStore):
@@ -35,7 +37,9 @@ class NotionPinecone(PineconeVectorStore):
         """The constructor for NotionPinecone class."""
         self.notion_path = notion_path
         self.embedder = embedder
-        self.notion_file_paths = list(Path(notion_path).glob("**/*.md"))
+        self.markdown_paths = list(Path(notion_path).glob("**/*.md"))
+        self.pdf_paths = list(Path(notion_path).glob("**/*.pdf"))
+        self.doc_paths = list(Path(notion_path).glob("**/*.doc")) + list(Path(notion_path).glob("**/*.docx"))
         self.docs, self.metadata = self.extract_notion_data()
         self.ids = hash_docs(self.docs)
         self.unique_notion_pages = self.get_unique_notion_pages()
@@ -58,18 +62,59 @@ class NotionPinecone(PineconeVectorStore):
         Returns:
             tuple: Tuple containing chunked data and sources.
         """
+        
+        print("Reading PDF files...")
+        pdf_docs, pdf_sources = self.extract_pdf(self.pdf_paths)
+        print("Reading Doc files...")
+        doc_docs, doc_sources = self.extract_doc(self.doc_paths)
+        print("Reading MD files...")
+        md_docs, md_sources = self.extract_md(self.markdown_paths)
+        
+        data = pdf_docs + doc_docs + md_docs
+        sources = pdf_sources + doc_sources + md_sources
+        
+        print("Chunking files...")
+        return chunk_data_sources(data, sources, self.embedder.split_text)
+
+    def extract_pdf(paths):
         data = []
         sources = []
-        print("Reading Notion files...")
-        for p in tqdm(self.notion_file_paths):
-            with open(p, encoding="utf-8") as f:
-                try:
+        for p in tqdm(paths):
+            try:
+                with pdfplumber.open(p) as pdf:
+                    content = ""
+                    for page in pdf.pages:
+                        content += page.extract_text()
+                    data.append(content)
+                    sources.append(format_notion_source(str(p)))
+            except Exception as e:
+                print(f"Unable to read file: {p}. Exception: {str(e)}. Skipping...")
+        return data, sources
+                
+    def extract_doc(paths):
+        data = []
+        sources = []
+        for p in tqdm(paths):
+            try:
+                doc = Document(p)
+                content = ' '.join([paragraph.text for paragraph in doc.paragraphs])
+                data.append(content)
+                sources.append(format_notion_source(str(p)))
+            except Exception as e:
+                print(f"Unable to read file: {p}. Exception: {str(e)}. Skipping...")
+        return data, sources
+
+    def extract_md(paths):
+        data = []
+        sources = []
+        for p in tqdm(paths):
+            try:
+                with open(p, encoding="utf-8") as f:
                     data.append(f.read())
                     sources.append(format_notion_source(str(p)))
-                except UnicodeDecodeError:
-                    print(f"Unable to read file: {p}. Skipping...")
-        print("Chunking Notion files...")
-        return chunk_data_sources(data, sources, self.embedder.split_text)
+            except UnicodeDecodeError:
+                print(f"Unable to read file: {p}. Skipping...")
+        return data, sources
 
     def get_unique_notion_pages(self):
         """
