@@ -33,6 +33,7 @@ class NotionPinecone(PineconeVectorStore):
         pinecone_environment=None,
         llm_model="gpt-3.5-turbo",
         proxy_connection=None,
+        process_text = True,
     ):
         """The constructor for NotionPinecone class."""
         self.notion_path = notion_path
@@ -40,9 +41,8 @@ class NotionPinecone(PineconeVectorStore):
         self.markdown_paths = list(Path(notion_path).glob("**/*.md"))
         self.pdf_paths = list(Path(notion_path).glob("**/*.pdf"))
         self.doc_paths = list(Path(notion_path).glob("**/*.doc")) + list(Path(notion_path).glob("**/*.docx"))
-        self.docs, self.metadata = self.extract_notion_data()
-        self.ids = hash_docs(self.docs)
-        self.unique_notion_pages = self.get_unique_notion_pages()
+        if process_text:
+            self.extract_notion_data()
         PineconeVectorStore.__init__(
             self,
             database_name=database_name,
@@ -74,7 +74,9 @@ class NotionPinecone(PineconeVectorStore):
         sources = pdf_sources + doc_sources + md_sources
         
         print("Chunking files...")
-        return chunk_data_sources(data, sources, self.embedder.split_text)
+        self.docs, self.metadata = chunk_data_sources(data, sources, self.embedder.split_text)
+        self.ids = hash_docs(self.docs)
+        self.unique_notion_pages = self.get_unique_notion_pages()
 
     def extract_pdf(self, paths):
         data = []
