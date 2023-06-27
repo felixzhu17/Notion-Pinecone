@@ -63,10 +63,10 @@ class NotionPinecone(PineconeVectorStore):
             tuple: Tuple containing chunked data and sources.
         """
         
-        print("Reading PDF files...")
-        pdf_docs, pdf_sources = self.extract_pdf(self.pdf_paths)
         print("Reading Doc files...")
         doc_docs, doc_sources = self.extract_doc(self.doc_paths)
+        print("Reading PDF files...")
+        pdf_docs, pdf_sources = self.extract_pdf(self.pdf_paths)
         print("Reading MD files...")
         md_docs, md_sources = self.extract_md(self.markdown_paths)
         
